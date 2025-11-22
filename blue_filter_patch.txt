@@ -1,0 +1,248 @@
+BLUE FILTER IMPLEMENTATION GUIDE
+=================================
+
+This document describes the changes needed to add the Blue Filter feature.
+
+## 1. popup.html - Add Blue Filter Button
+
+Line 22-27: Replace with:
+```html
+      <div class="profile-buttons">
+        <button class="profile-btn" data-profile="dyslexia">Dyslexia</button>
+        <button class="profile-btn" data-profile="low-vision">Low Vision</button>
+        <button class="profile-btn" data-profile="motor">Motor</button>
+        <button class="profile-btn" data-profile="cognitive">Cognitive</button>
+        <button class="profile-btn" data-profile="blue-filter">Blue Filter</button>
+      </div>
+```
+
+## 2. popup.js - Add Blue Filter Profile
+
+Line 25-34: Add blueFilterEnabled to defaultSettings:
+```javascript
+  // Layout & Navigation
+  hideImages: false,
+  highlightLinks: false,
+  bigCursor: false,
+  pauseAnimations: false,
+  simplifyLayout: false,
+  
+  // Blue Filter
+  blueFilterEnabled: false,
+  
+  // Element-specific customizations
+  customElements: {}
+};
+```
+
+Line 67-76: Add blue-filter profile:
+```javascript
+  cognitive: {
+    fontSize: 18,
+    lineHeight: 1.8,
+    simplifyLayout: true,
+    pauseAnimations: true,
+    hideImages: true,
+    bgColor: '#f0f8ff',
+    textColor: '#333333'
+  },
+  'blue-filter': {
+    bgColor: '#FFF6D9',
+    textColor: '#4A3B00',
+    blueFilterEnabled: true
+  }
+};
+```
+
+Line 436-442: Add blueFilterEnabled to getCurrentSettings:
+```javascript
+    hideImages: document.getElementById('hideImages').checked,
+    highlightLinks: document.getElementById('highlightLinks').checked,
+    bigCursor: document.getElementById('bigCursor').checked,
+    pauseAnimations: document.getElementById('pauseAnimations').checked,
+    simplifyLayout: document.getElementById('simplifyLayout').checked,
+    blueFilterEnabled: false // Will be set by profile application
+  };
+}
+```
+
+## 3. content.js - Add Blue Filter Styles
+
+After line 143, before the closing backtick of the css template literal, add:
+```javascript
+    
+    ${settings.blueFilterEnabled ? `
+      /* Blue Filter - Warm Yellowish Tones */
+      #betterweb-bluefilter-overlay {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: rgba(255, 220, 120, 0.15) !important;
+        pointer-events: none !important;
+        z-index: 999999 !important;
+      }
+    ` : ''}
+```
+
+After line 147 (after document.head.appendChild(style);), add:
+```javascript
+  
+  // Handle Blue Filter overlay
+  if (settings.blueFilterEnabled) {
+    enableBlueFilter();
+  } else {
+    disableBlueFilter();
+  }
+```
+
+After line 159 (in removeAccessibilityStyles function), add:
+```javascript
+  
+  // Remove Blue Filter overlay
+  disableBlueFilter();
+```
+
+At the end of the file (after line 494), add these new functions:
+```javascript
+
+// Enable Blue Filter
+function enableBlueFilter() {
+  // Remove existing overlay if any
+  disableBlueFilter();
+  
+  // Create overlay element
+  const overlay = document.createElement('div');
+  overlay.id = 'betterweb-bluefilter-overlay';
+  overlay.style.cssText = `
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(255, 220, 120, 0.15) !important;
+    pointer-events: none !important;
+    z-index: 999999 !important;
+  `;
+  document.body.appendChild(overlay);
+  
+  // Add Blue Filter styles
+  const blueFilterStyleId = 'betterweb-bluefilter';
+  let blueFilterStyle = document.getElementById(blueFilterStyleId);
+  if (!blueFilterStyle) {
+    blueFilterStyle = document.createElement('style');
+    blueFilterStyle.id = blueFilterStyleId;
+    blueFilterStyle.textContent = `
+      /* Blue Filter Warm Tones */
+      header, nav, .header, .navigation, .navbar,
+      [role="banner"], [role="navigation"] {
+        background-color: #FFF8E1 !important;
+        color: #4A3B00 !important;
+      }
+      
+      button, .button, .btn,
+      input[type="button"], input[type="submit"], input[type="reset"] {
+        background-color: #FFE082 !important;
+        color: #4A3B00 !important;
+        border-color: #FFD54F !important;
+      }
+      
+      .card, .panel, .box, .container,
+      [class*="card"], [class*="panel"] {
+        background-color: #FFF9C4 !important;
+        color: #4A3B00 !important;
+      }
+    `;
+    document.head.appendChild(blueFilterStyle);
+  }
+}
+
+// Disable Blue Filter
+function disableBlueFilter() {
+  // Remove overlay
+  const overlay = document.getElementById('betterweb-bluefilter-overlay');
+  if (overlay) {
+    overlay.remove();
+  }
+  
+  // Remove Blue Filter styles
+  const blueFilterStyle = document.getElementById('betterweb-bluefilter');
+  if (blueFilterStyle) {
+    blueFilterStyle.remove();
+  }
+}
+```
+
+## 4. popup.js - Modify applyProfile Function
+
+Replace the applyProfile function (lines 218-251) with:
+```javascript
+// Apply accessibility profile
+function applyProfile(profileName) {
+  const profile = accessibilityProfiles[profileName];
+  if (!profile) return;
+  
+  // First, reset all settings to defaults to avoid carrying over previous profile settings
+  Object.keys(defaultSettings).forEach(key => {
+    const element = document.getElementById(key);
+    if (element) {
+      if (element.type === 'checkbox') {
+        element.checked = defaultSettings[key];
+      } else {
+        element.value = defaultSettings[key];
+      }
+    }
+  });
+  
+  // Then apply the specific profile settings (excluding blueFilterEnabled which has no UI element)
+  Object.keys(profile).forEach(key => {
+    if (key === 'blueFilterEnabled') return; // Skip this, it will be handled separately
+    const element = document.getElementById(key);
+    if (element) {
+      if (element.type === 'checkbox') {
+        element.checked = profile[key];
+      } else {
+        element.value = profile[key];
+      }
+    }
+  });
+  
+  updateDisplayValues();
+  
+  // Get current settings and add blueFilterEnabled flag if present in profile
+  const settings = getCurrentSettings();
+  if (profile.blueFilterEnabled !== undefined) {
+    settings.blueFilterEnabled = profile.blueFilterEnabled;
+  }
+  
+  // Save and apply with the complete settings including blueFilterEnabled
+  chrome.storage.sync.set(settings, () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const currentTab = tabs[0];
+      
+      // Check if we're on a restricted page
+      if (currentTab && currentTab.url && 
+          (currentTab.url.startsWith('chrome://') || 
+           currentTab.url.startsWith('edge://') || 
+           currentTab.url.startsWith('chrome-extension://') ||
+           currentTab.url.startsWith('moz-extension://') ||
+           currentTab.url.startsWith('about:'))) {
+        return;
+      }
+      
+      // Only inject if we have a valid tab and URL
+      if (currentTab && currentTab.id && currentTab.url && 
+          (currentTab.url.startsWith('http://') || currentTab.url.startsWith('https://'))) {
+        chrome.scripting.executeScript({
+          target: { tabId: currentTab.id },
+          func: applyAccessibilityStyles,
+          args: [settings]
+        }).catch((error) => {
+          console.log('Could not inject styles:', error.message);
+        });
+      }
+    });
+  });
+}
+```
