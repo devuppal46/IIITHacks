@@ -23,7 +23,7 @@ function applyAccessibilityStyles(settings) {
 
   const style = document.createElement("style");
   style.id = styleId;
-  
+
   let css = `
     /* Universal Accessibility Styles */
     html, body {
@@ -145,7 +145,29 @@ function applyAccessibilityStyles(settings) {
 
   style.textContent = css;
   document.head.appendChild(style);
-  
+
+  // Blue Filter Logic
+  const blueFilterId = "eduadapt-blue-filter";
+  const existingFilter = document.getElementById(blueFilterId);
+  if (existingFilter) existingFilter.remove();
+
+  if (settings.blueFilter) {
+    const filterDiv = document.createElement('div');
+    filterDiv.id = blueFilterId;
+    filterDiv.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(135, 206, 250, 0.18);
+      pointer-events: none;
+      z-index: 9999999;
+      mix-blend-mode: multiply;
+    `;
+    document.body.appendChild(filterDiv);
+  }
+
   showNotification('BetterWeb Accessibility Settings Applied ✅', '#4CAF50');
 }
 
@@ -154,7 +176,11 @@ function removeAccessibilityStyles() {
   const styleId = "eduadapt-accessibility-style";
   const existing = document.getElementById(styleId);
   if (existing) existing.remove();
-  
+
+  const blueFilterId = "eduadapt-blue-filter";
+  const existingFilter = document.getElementById(blueFilterId);
+  if (existingFilter) existingFilter.remove();
+
   showNotification('Accessibility Settings Removed', '#f44336');
 }
 
@@ -177,7 +203,7 @@ function showNotification(message, color) {
   `;
   notification.textContent = message;
   document.body.appendChild(notification);
-  
+
   setTimeout(() => {
     if (notification.parentNode) {
       notification.style.opacity = '0';
@@ -365,6 +391,7 @@ function applyProfile(profileName, settings) {
     brightness: 100,
     bgColor: '#ffffff',
     textColor: '#000000',
+    blueFilter: false,
     hideImages: false,
     highlightLinks: false,
     bigCursor: false,
@@ -431,13 +458,13 @@ function findElementsOnPage(searchTerm) {
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span', 'div',
     'img', 'video', 'iframe', 'form', 'table', 'nav', 'header', 'footer'
   ];
-  
+
   selectors.forEach(selector => {
     const foundElements = document.querySelectorAll(selector);
     foundElements.forEach((el, index) => {
       const text = el.textContent || el.alt || el.title || '';
       const tag = el.tagName.toLowerCase();
-      
+
       if (tag.includes(searchTerm) || text.toLowerCase().includes(searchTerm)) {
         elements.push({
           tag: tag,
@@ -447,7 +474,7 @@ function findElementsOnPage(searchTerm) {
       }
     });
   });
-  
+
   return elements;
 }
 
@@ -464,9 +491,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 chrome.storage.sync.get(null, (settings) => {
   if (settings && Object.keys(settings).length > 0) {
     // Check if we have any meaningful settings
-    const hasSettings = settings.fontSize || settings.fontFamily || settings.cbType || 
-                       settings.hideImages || settings.simplifyLayout || settings.highlightLinks;
-    
+    const hasSettings = settings.fontSize || settings.fontFamily || settings.cbType ||
+      settings.hideImages || settings.simplifyLayout || settings.highlightLinks || settings.blueFilter;
+
     if (hasSettings) {
       setTimeout(() => {
         applyAccessibilityStyles(settings);
@@ -482,7 +509,7 @@ document.addEventListener('keydown', (event) => {
     event.preventDefault();
     startSpeechRecognition();
   }
-  
+
   // Ctrl+Shift+R to reset all settings
   if (event.ctrlKey && event.shiftKey && event.key === 'R') {
     event.preventDefault();

@@ -8,21 +8,22 @@ const defaultSettings = {
   letterSpacing: 0,
   lineHeight: 1.4,
   wordSpacing: 0,
-  
+
   // Colors & Vision
   cbType: '',
   contrast: 100,
   brightness: 100,
   bgColor: '#ffffff',
   textColor: '#000000',
-  
+  blueFilter: false,
+
   // Layout & Navigation
   hideImages: false,
   highlightLinks: false,
   bigCursor: false,
   pauseAnimations: false,
   simplifyLayout: false,
-  
+
   // Element-specific customizations
   customElements: {}
 };
@@ -38,7 +39,8 @@ const accessibilityProfiles = {
     bgColor: '#fefbd8',
     textColor: '#333333',
     highlightLinks: true,
-    pauseAnimations: true
+    pauseAnimations: true,
+    blueFilter: false
   },
   'low-vision': {
     fontSize: 22,
@@ -48,7 +50,8 @@ const accessibilityProfiles = {
     textColor: '#ffff00',
     bigCursor: true,
     hideImages: false,
-    highlightLinks: true
+    highlightLinks: true,
+    blueFilter: false
   },
   motor: {
     fontSize: 20,
@@ -56,7 +59,8 @@ const accessibilityProfiles = {
     bigCursor: true,
     pauseAnimations: true,
     simplifyLayout: true,
-    highlightLinks: true
+    highlightLinks: true,
+    blueFilter: false
   },
   cognitive: {
     fontSize: 18,
@@ -65,7 +69,8 @@ const accessibilityProfiles = {
     pauseAnimations: true,
     hideImages: true,
     bgColor: '#f0f8ff',
-    textColor: '#333333'
+    textColor: '#333333',
+    blueFilter: true
   }
 };
 
@@ -85,21 +90,22 @@ function loadSettings() {
     document.getElementById('letterSpacing').value = data.letterSpacing || 0;
     document.getElementById('lineHeight').value = data.lineHeight || 1.4;
     document.getElementById('wordSpacing').value = data.wordSpacing || 0;
-    
+
     // Colors & Vision
     document.getElementById('cbType').value = data.cbType || '';
     document.getElementById('contrast').value = data.contrast || 100;
     document.getElementById('brightness').value = data.brightness || 100;
     document.getElementById('bgColor').value = data.bgColor || '#ffffff';
     document.getElementById('textColor').value = data.textColor || '#000000';
-    
+    document.getElementById('blueFilter').checked = data.blueFilter || false;
+
     // Layout & Navigation
     document.getElementById('hideImages').checked = data.hideImages || false;
     document.getElementById('highlightLinks').checked = data.highlightLinks || false;
     document.getElementById('bigCursor').checked = data.bigCursor || false;
     document.getElementById('pauseAnimations').checked = data.pauseAnimations || false;
     document.getElementById('simplifyLayout').checked = data.simplifyLayout || false;
-    
+
     updateDisplayValues();
   });
 }
@@ -120,42 +126,42 @@ function setupEventListeners() {
   document.getElementById('fontSize').addEventListener('input', (e) => {
     document.getElementById('fontSizeValue').textContent = `${e.target.value}px`;
   });
-  
+
   document.getElementById('letterSpacing').addEventListener('input', (e) => {
     document.getElementById('letterSpacingValue').textContent = `${(e.target.value / 10)}em`;
   });
-  
+
   document.getElementById('lineHeight').addEventListener('input', (e) => {
     document.getElementById('lineHeightValue').textContent = e.target.value;
   });
-  
+
   document.getElementById('wordSpacing').addEventListener('input', (e) => {
     document.getElementById('wordSpacingValue').textContent = `${(e.target.value / 10)}em`;
   });
-  
+
   document.getElementById('contrast').addEventListener('input', (e) => {
     document.getElementById('contrastValue').textContent = `${e.target.value}%`;
   });
-  
+
   document.getElementById('brightness').addEventListener('input', (e) => {
     document.getElementById('brightnessValue').textContent = `${e.target.value}%`;
   });
-  
+
   // Color reset buttons
   document.getElementById('resetBgColor').addEventListener('click', () => {
     document.getElementById('bgColor').value = '#ffffff';
   });
-  
+
   document.getElementById('resetTextColor').addEventListener('click', () => {
     document.getElementById('textColor').value = '#000000';
   });
-  
+
   // Element search
   document.getElementById('searchBtn').addEventListener('click', searchElements);
   document.getElementById('elementSearch').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') searchElements();
   });
-  
+
   // Main buttons
   document.getElementById('apply').addEventListener('click', applySettings);
   document.getElementById('reset').addEventListener('click', resetSettings);
@@ -168,7 +174,7 @@ function setupProfileButtons() {
     btn.addEventListener('click', (e) => {
       const profile = e.target.dataset.profile;
       applyProfile(profile);
-      
+
       // Update active state
       document.querySelectorAll('.profile-btn').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
@@ -180,7 +186,7 @@ function setupProfileButtons() {
 function applyProfile(profileName) {
   const profile = accessibilityProfiles[profileName];
   if (!profile) return;
-  
+
   // First, reset all settings to defaults to avoid carrying over previous profile settings
   Object.keys(defaultSettings).forEach(key => {
     const element = document.getElementById(key);
@@ -192,7 +198,7 @@ function applyProfile(profileName) {
       }
     }
   });
-  
+
   // Then apply the specific profile settings
   Object.keys(profile).forEach(key => {
     const element = document.getElementById(key);
@@ -204,9 +210,9 @@ function applyProfile(profileName) {
       }
     }
   });
-  
+
   updateDisplayValues();
-  
+
   // Auto-apply the profile
   setTimeout(() => applySettings(), 100);
 }
@@ -215,7 +221,7 @@ function applyProfile(profileName) {
 function searchElements() {
   const searchTerm = document.getElementById('elementSearch').value.toLowerCase();
   if (!searchTerm) return;
-  
+
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.scripting.executeScript({
       target: { tabId: tabs[0].id },
@@ -233,12 +239,12 @@ function searchElements() {
 function displaySearchResults(elements) {
   const resultsContainer = document.getElementById('searchResults');
   resultsContainer.innerHTML = '';
-  
+
   if (elements.length === 0) {
     resultsContainer.innerHTML = '<div class="search-result-item">No elements found</div>';
     return;
   }
-  
+
   elements.slice(0, 10).forEach((element, index) => {
     const resultItem = document.createElement('div');
     resultItem.className = 'search-result-item';
@@ -260,7 +266,7 @@ function highlightElement(selector) {
         document.querySelectorAll('.eduadapt-highlight').forEach(el => {
           el.classList.remove('eduadapt-highlight');
         });
-        
+
         // Add highlight to selected element
         const element = document.querySelector(selector);
         if (element) {
@@ -268,7 +274,7 @@ function highlightElement(selector) {
           element.style.outline = '3px solid #ff6b6b';
           element.style.outlineOffset = '2px';
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          
+
           // Remove highlight after 3 seconds
           setTimeout(() => {
             element.style.outline = '';
@@ -285,7 +291,7 @@ function highlightElement(selector) {
 // Apply all settings
 function applySettings() {
   const settings = getCurrentSettings();
-  
+
   chrome.storage.sync.set(settings, () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       chrome.scripting.executeScript({
@@ -310,6 +316,7 @@ function getCurrentSettings() {
     brightness: parseInt(document.getElementById('brightness').value),
     bgColor: document.getElementById('bgColor').value,
     textColor: document.getElementById('textColor').value,
+    blueFilter: document.getElementById('blueFilter').checked,
     hideImages: document.getElementById('hideImages').checked,
     highlightLinks: document.getElementById('highlightLinks').checked,
     bigCursor: document.getElementById('bigCursor').checked,
@@ -330,9 +337,9 @@ function resetSettings() {
       }
     }
   });
-  
+
   updateDisplayValues();
-  
+
   chrome.storage.sync.clear(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       chrome.scripting.executeScript({
@@ -340,10 +347,10 @@ function resetSettings() {
         func: removeAccessibilityStyles
       });
     });
-    
+
     // Remove active state from profile buttons
     document.querySelectorAll('.profile-btn').forEach(btn => btn.classList.remove('active'));
-    
+
     alert("All accessibility settings have been reset.");
   });
 }
@@ -363,7 +370,7 @@ Available voice commands:
 Speak clearly after clicking OK.
 `;
   alert(commands);
-  
+
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.tabs.sendMessage(tabs[0].id, { action: "startSpeechRecognition" }, (response) => {
       if (chrome.runtime.lastError) {
@@ -383,13 +390,13 @@ function findElementsOnPage(searchTerm) {
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span', 'div',
     'img', 'video', 'iframe', 'form', 'table', 'nav', 'header', 'footer'
   ];
-  
+
   selectors.forEach(selector => {
     const foundElements = document.querySelectorAll(selector);
     foundElements.forEach((el, index) => {
       const text = el.textContent || el.alt || el.title || '';
       const tag = el.tagName.toLowerCase();
-      
+
       if (tag.includes(searchTerm) || text.toLowerCase().includes(searchTerm)) {
         elements.push({
           tag: tag,
@@ -399,7 +406,7 @@ function findElementsOnPage(searchTerm) {
       }
     });
   });
-  
+
   return elements;
 }
 
@@ -422,7 +429,7 @@ function applyAccessibilityStyles(settings) {
 
   const style = document.createElement("style");
   style.id = styleId;
-  
+
   let css = `
     /* Universal Accessibility Styles */
     html, body {
@@ -495,7 +502,7 @@ function applyAccessibilityStyles(settings) {
 
   style.textContent = css;
   document.head.appendChild(style);
-  
+
   // Show confirmation
   const notification = document.createElement('div');
   notification.style.cssText = `
@@ -513,7 +520,7 @@ function applyAccessibilityStyles(settings) {
   `;
   notification.textContent = 'BetterWeb Accessibility Settings Applied ✅';
   document.body.appendChild(notification);
-  
+
   setTimeout(() => {
     if (notification.parentNode) {
       notification.parentNode.removeChild(notification);
@@ -525,7 +532,7 @@ function removeAccessibilityStyles() {
   const styleId = "eduadapt-accessibility-style";
   const existing = document.getElementById(styleId);
   if (existing) existing.remove();
-  
+
   // Show confirmation
   const notification = document.createElement('div');
   notification.style.cssText = `
@@ -543,7 +550,7 @@ function removeAccessibilityStyles() {
   `;
   notification.textContent = 'Accessibility Settings Removed';
   document.body.appendChild(notification);
-  
+
   setTimeout(() => {
     if (notification.parentNode) {
       notification.parentNode.removeChild(notification);
