@@ -666,12 +666,74 @@ function applyAccessibilityStyles(settings) {
 
   style.textContent = css;
   document.head.appendChild(style);
+
+  // Handle Blue Filter
+  if (settings.blueFilterEnabled) {
+    // Remove existing overlay if any
+    let existingOverlay = document.getElementById('betterweb-bluefilter-overlay');
+    if (existingOverlay) existingOverlay.remove();
+    let existingStyle = document.getElementById('betterweb-bluefilter');
+    if (existingStyle) existingStyle.remove();
+
+    // Create overlay element
+    const overlay = document.createElement('div');
+    overlay.id = 'betterweb-bluefilter-overlay';
+    overlay.style.cssText = `
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      background: rgba(255, 220, 120, 0.15) !important;
+      pointer-events: none !important;
+      z-index: 999999 !important;
+    `;
+    document.body.appendChild(overlay);
+
+    // Add Blue Filter styles
+    const blueFilterStyle = document.createElement('style');
+    blueFilterStyle.id = 'betterweb-bluefilter';
+    blueFilterStyle.textContent = `
+      /* Blue Filter Warm Tones */
+      header, nav, .header, .navigation, .navbar,
+      [role="banner"], [role="navigation"] {
+        background-color: #FFF8E1 !important;
+        color: #4A3B00 !important;
+      }
+      
+      button, .button, .btn,
+      input[type="button"], input[type="submit"], input[type="reset"] {
+        background-color: #FFE082 !important;
+        color: #4A3B00 !important;
+        border-color: #FFD54F !important;
+      }
+      
+      .card, .panel, .box, .container,
+      [class*="card"], [class*="panel"] {
+        background-color: #FFF9C4 !important;
+        color: #4A3B00 !important;
+      }
+    `;
+    document.head.appendChild(blueFilterStyle);
+  } else {
+    // Remove blue filter if disabled
+    let overlay = document.getElementById('betterweb-bluefilter-overlay');
+    if (overlay) overlay.remove();
+    let blueFilterStyle = document.getElementById('betterweb-bluefilter');
+    if (blueFilterStyle) blueFilterStyle.remove();
+  }
 }
 
 function removeAccessibilityStyles() {
   const styleId = "eduadapt-accessibility-style";
   const existing = document.getElementById(styleId);
   if (existing) existing.remove();
+
+  // Remove Blue Filter elements
+  const overlay = document.getElementById('betterweb-bluefilter-overlay');
+  if (overlay) overlay.remove();
+  const blueFilterStyle = document.getElementById('betterweb-bluefilter');
+  if (blueFilterStyle) blueFilterStyle.remove();
 
   // Show confirmation
   const notification = document.createElement('div');
