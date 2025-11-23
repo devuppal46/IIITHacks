@@ -1,67 +1,37 @@
-BetterWeb – Adaptation Made Easy A powerful Chrome extension designed to make the internet more accessible for users with ADHD, dyslexia, sensory sensitivities, visual impairments, and other cognitive conditions.
+## BetterWeb: Adaptation Made Easy
 
-Tagline
-**Adaptation Made Easy.**Personalise the web in real-time with AI-powered accessibility. **
+**A powerful Chrome extension designed to make the internet more accessible for users with ADHD, dyslexia, sensory sensitivities, visual impairments, and other cognitive conditions.**
 
-Problem Statement
-The web today isn’t built for everyone. Millions of users with cognitive and sensory disabilities are excluded by rigid, inaccessible design. This limits access to education, services, and opportunities.
+### The Problem
 
+The modern web is often rigid and inaccessible, excluding millions of users with cognitive and sensory disabilities. This limits equitable access to education, services, and essential opportunities.
 
-Screenshot 2025-05-06 at 5 12 05 PM
+### Our Solution
 
-Our Solution
-BetterWeb is a Chrome extension that empowers users to personalise their browsing experience using AI-driven accessibility tools. Whether it’s reducing sensory overload, enabling voice control, or adjusting visuals, BetterWeb adapts websites to each user’s needs.
+**BetterWeb** is an AI-driven Chrome extension that empowers users to instantly personalize their browsing experience. It adapts websites in real-time to mitigate sensory overload, support visual needs, and enable hands-free interaction.
 
-🌟 Key Features
-Accessibility Profile Setup
-Upon installation, users complete a simple three-step form to specify their disabilities/preferences (e.g., ADHD, dyslexia).
+### Key Features
 
-Text-to-Speech (TTS)
-Highlight text and right-click to have it read aloud.
+| Feature Category | Description |
+| :--- | :--- |
+| **Personalization** | Simple three-step setup to define accessibility profiles (e.g., ADHD, Dyslexia). |
+| **Visual & Sensory** | **Theming System:** Soft pastel themes (Lavender, Mint, Peach) to reduce sensory overstimulation. |
+| **Reading Support** | **Text-to-Speech (TTS):** Highlight and right-click to read text aloud (Google TTS). |
+| **AI/Hands-Free** | **AI Assistant:** Natural language chatbot for guided feature triggering and tool explanations. |
+| **Motion/Navigation** | **Motion Sensitivity Support:** Voice command and head-tracking for hands-free navigation (utilizing TensorFlow.js / MediaPipe). |
+| **Advanced Prototype** | **AI-Based Image Color Correction:** Uses generative AI to adapt image contrast for various types of color blindness. |
 
-Theming System
-Choose from soft pastel themes (lavender, mint, peach) to reduce overstimulation—designed especially for autism spectrum users.
+### Tech Stack
 
-Options Page Interface
-Dedicated settings for:
+* **Frontend:** HTML, CSS, JavaScript, React.js, TailwindCSS
+* **Extension API:** Chrome APIs (Manifest V3, Chrome Storage)
+* **AI/Tools:** Cohere API (v2), Google Generative AI, Google TTS, OpenCV, PyTesseract
+* **Platform:** Streamlit (for AI Agent), BrowserUse, DOM Manipulation
 
-Visual Disabilities
-Dyslexia
-ADHD
-Photosensitivity
-Cognitive Needs
-Motion Sensitivity
-AI Assistant & Talking Bot
-Natural language chatbot to guide users, trigger features, or explain tools—all hands-free.
+### Future Roadmap
 
-🖼️ AI-Based Image Color Correction (Prototype Phase)
-Uses generative AI to adapt image contrast for various types of colour blindness.
+* Full generative color-enhancement implementation.
+* Real-time accessibility audit engine.
+* Cloud-based syncing across user devices.
+* Development of the Auto-adaptive Learning Platform.
 
-🕹️ Motion Sensitivity Support
-Voice command and head-tracking (using TensorFlow.js / MediaPipe) for hands-free navigation.
-
-Learning Platform (Planned)
-Auto-adaptive UI based on a user’s profile, offering inclusive course delivery.
-
-Tech Stack
--**Ai Agent -> streamlit,web scraping using ChatGenerative Embeddings, GoogleGenerative Ai, BrwoserUse
-
-Frontend: HTML, CSS, JavaScript, React.js, TailwindCSS
-Chrome APIs: Manifest V3, Chrome Storage
-AI & Tools: Cohere API (v2), Google TTS, OpenCV, PyTesseract, FFmpeg, PyQt5
-Other: JSON Dataset, DOM Manipulation
-Revenue Model
-Freemium:
-
-Basic tools: Themes, TTS, profile setup
-Limited chatbot & manual control
-Premium (Subscription):
-
-Advanced chatbot (unlimited NLP)
-Auto-mode, color correction
-Cloud sync & customized courses
-Future Plans
-Full generative color-enhancement
-Real-time accessibility audit engine
-Cloud-based syncing across devices
-More granular accessibility triggers
